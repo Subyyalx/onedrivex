@@ -1,4 +1,3 @@
-
 from flask import Flask, redirect, url_for, session, request, render_template, flash, send_file, abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -9,10 +8,10 @@ from io import BytesIO
 from azure.storage.blob import BlobServiceClient
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'Xavor123'
 
 # Configurations
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://user:pass@localhost/onedriveapp'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://adminx:Xavor@123456@onedrivex101.mysql.database.azure.com/onedb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
