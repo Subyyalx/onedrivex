@@ -1,0 +1,27 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, {{ user.email }}!</h1>
+    <h3>Files in {{ prefix }}</h3>
+    <ul>
+        {% for file in files %}
+            <li>
+                <a href="{{ url_for('preview', file=file) }}">{{ file }}</a> |
+                <a href="{{ url_for('download', file=file) }}">Download</a>
+            </li>
+        {% else %}
+            <li>No files found.</li>
+        {% endfor %}
+    </ul>
+    <form method='POST' action="{{ url_for('upload') }}" enctype='multipart/form-data'>
+        <input type='file' name='files' multiple>
+        <input type='hidden' name='folder' value="{{ prefix }}">
+        <button type='submit'>Upload Files</button>
+    </form>
+    <a href="{{ url_for('logout') }}">Logout</a>
+</body>
+</html>
