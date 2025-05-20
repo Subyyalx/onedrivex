@@ -28,7 +28,8 @@ CONTAINER_NAME = 'userfiles'
 CLIENT_ID = '068db2f1-f67e-4e87-802d-846f63ba0528'
 CLIENT_SECRET = 'PQC8Q~UUBgl8foX845p3SeT22Z.quXfM00wRxbGt'
 AUTHORITY = 'https://login.microsoftonline.com/55ebfaff-4038-47d6-bda3-21d69a1f66b2'
-REDIRECT_PATH = '/callback'
+REDIRECT_URI = 'https://onedrivex101.azurewebsites.net/callback'
+
 SCOPE = ['User.Read']
 SESSION_TYPE = 'filesystem'
 
