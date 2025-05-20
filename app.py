@@ -6,11 +6,12 @@ from functools import wraps
 import os
 from io import BytesIO
 from azure.storage.blob import BlobServiceClient
+import uuid
 
 app = Flask(__name__)
 app.secret_key = 'Xavor123'
 
-# Configurations
+# Configurations for MySQL Database
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://adminx:Xavor@123456@onedrivex101.mysql.database.azure.com/onedb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -41,12 +42,23 @@ class User(db.Model):
 
     def is_authenticated(self):
         return True
+
     def is_active(self):
         return True
+
     def is_anonymous(self):
         return False
+
     def get_id(self):
         return str(self.id)
+
+class FolderPermission(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    folder_id = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    role = db.Column(db.String(20))  # Owner, Member, Reader
+
+    user = db.relationship('User', backref=db.backref('permissions', lazy=True))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -65,6 +77,8 @@ def role_required(min_role):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+REDIRECT_PATH = '/callback'  # Define the REDIRECT_PATH at the top
 
 @app.route('/')
 def index():
@@ -167,7 +181,46 @@ def preview():
     except Exception:
         abort(404)
 
-# Admin panel and folder sharing would follow similarly...
+@app.route('/admin')
+@login_required
+@role_required('Owner')
+def admin():
+    folders = Folder.query.all()
+    users = User.query.all()
+    return render_template('admin.html', folders=folders, users=users)
+
+@app.route('/admin/assign_permission', methods=['POST'])
+@login_required
+@role_required('Owner')
+def assign_permission():
+    folder_id = request.form['folder_id']
+    user_id = request.form['user_id']
+    role = request.form['role']
+
+    permission = FolderPermission(folder_id=folder_id, user_id=user_id, role=role)
+    db.session.add(permission)
+    db.session.commit()
+
+    flash('Permission successfully assigned', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/share_folder', methods=['POST'])
+@login_required
+@role_required('Owner')
+def share_folder():
+    folder_id = request.form['folder_id']
+    token = generate_token(folder_id)
+
+    new_share = FolderShare(folder_id=folder_id, token=token, user_id=current_user.id)
+    db.session.add(new_share)
+    db.session.commit()
+
+    flash('Folder sharing link created: ' + request.url_root + 'shared_folder?token=' + token, 'success')
+    return redirect(url_for('dashboard'))
+
+# Utility to generate folder share token
+def generate_token(folder_id):
+    return str(uuid.uuid4())
 
 if __name__ == '__main__':
     app.run(debug=True)
