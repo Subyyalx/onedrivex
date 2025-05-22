@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+<div class="container mt-4">
+  <h2>Admin Panel</h2>
+  <a href="{{ url_for('create_user') }}" class="btn btn-success mb-3">Create New User</a>
+  <a href="{{ url_for('create_project') }}" class="btn btn-primary mb-3 ms-2">Create Project</a>
+
+  <h4>All Users</h4>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Update Role</th>
+        <th>Reset Password</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.email }}</td>
+        <td>{{ user.role }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('assign_permission') }}">
+            <input type="hidden" name="user_id" value="{{ user.id }}">
+            <select name="role" class="form-select d-inline w-auto">
+              <option value="Reader" {% if user.role == 'Reader' %}selected{% endif %}>Reader</option>
+              <option value="Member" {% if user.role == 'Member' %}selected{% endif %}>Member</option>
+              <option value="Owner" {% if user.role == 'Owner' %}selected{% endif %}>Owner</option>
+            </select>
+            <button class="btn btn-sm btn-outline-success">Update</button>
+          </form>
+        </td>
+        <td>
+          <form method="POST" action="{{ url_for('reset_password') }}">
+            <input type="hidden" name="user_id" value="{{ user.id }}">
+            <input type="password" name="new_password" class="form-control form-control-sm d-inline w-auto" placeholder="New Password" required>
+            <button class="btn btn-sm btn-danger">Reset</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- Projects Section -->
+  <h4 class="mt-5">Projects</h4>
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Project</th>
+        <th>Created By</th>
+        <th>Members</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for project in projects %}
+      <tr>
+        <td>{{ project.name }}</td>
+        <td>{{ project.created_by }}</td>
+        <td>
+          {% for member in members if member.project_id == project.id %}
+            <span class="badge bg-secondary">{{ member.username }}</span>
+          {% endfor %}
+        </td>
+        <td>
+          <a href="{{ url_for('edit_project_members', project_id=project.id) }}" class="btn btn-sm btn-primary">Edit Members</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+</body>
+</html>
